@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
   libgtk2.0-dev \
   xvfb
 
+RUN apt-get install -y xserver-xorg-video-all
+
 RUN mkdir /opt/bin
 # Copy binares from host
 ADD ./bin /opt/bin
