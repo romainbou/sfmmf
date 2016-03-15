@@ -19,9 +19,9 @@ ENV PATH $PATH:/opt/bin/poissonrecon
 ENV PATH $PATH:/opt/bin/meshlab
 ENV PATH $PATH:/opt/bin/vsfm
 
-RUN chmod +x /opt/photo-to-mesh.sh && mkdir /opt/workdir
 RUN Xvfb :100 &
 ENV DISPLAY :100
 
 # copy sequence script
 ADD ./photo-to-mesh.sh /opt/
+RUN chmod +x /opt/photo-to-mesh.sh && mkdir /opt/workdir
