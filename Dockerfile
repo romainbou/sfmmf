@@ -9,11 +9,11 @@ RUN apt-get update && apt-get install -y \
   libgtk2.0-dev xvfb
 
 # copy sequence script
-ADD ../photo-to-mesh.sh /opt/
+ADD ./photo-to-mesh.sh /opt/
 
 RUN mkdir /opt/bin
 # Copy binares from host
-ADD ../bin /opt/bin
+ADD ./bin /opt/bin
 
   # Add PoissonRecon, VisualSFM and meshlab bin folder to PATH.
 ENV PATH $PATH:/opt/bin/poissonrecon
