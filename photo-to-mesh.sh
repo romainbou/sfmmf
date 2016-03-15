@@ -65,20 +65,21 @@ removeVisualtSFMfiles () {
 }
 
 computeMesh () {
-
-  #createImageList
-  resizeAllimage
-  #VisualSFM sfm+pmvs $inputFolder/resized-$outputName-image-list.txt $inputFolder/points/$outputName-visualSFM-results.nvm
-  #mergeMeshes
+  inputFolder=$1
+  outputName=$2
+  createImageList $inputFolder $outputName
+  resizeAllimage $inputFolder $outputName
+  VisualSFM sfm+pmvs $inputFolder/resized-$outputName-image-list.txt $inputFolder/points/$outputName-visualSFM-results.nvm
+  mergeMeshes $inputFolder $outputName
   # TODO avancement des stif files ls -1 | grep .sift | wc -l
   # TODO maybe remove SIFT files in the images folder
-  #pmvsComputation
+  pmvsComputation $inputFolder $outputName
   #removeImageLists
   # removeVisualtSFMfiles
 }
 
 if [ -n "$inputFolder" ] && [ -n "$outputName" ]; then
-  computeMesh
+  computeMesh $inputFolder $outputName
 else
     echo "argument error"
 fi
