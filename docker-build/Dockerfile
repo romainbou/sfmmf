@@ -79,6 +79,17 @@ RUN cd /opt && \
   cd PoissonRecon && \
   make
 
+# Download and build libpba (no_gpu for now)
+RUN cd /opt && \
+  wget http://grail.cs.washington.edu/projects/mcba/pba_v1.0.5.zip && \
+  unzip pba_v1.0.5.zip
+
+RUN cd /opt/pba && \
+  mv makefile makefile_gpu && \
+  mv makefile_no_gpu makefile && \
+  make && \
+  cp bin/libpba_no_gpu.so /opt/visualSFM/vsfm/bin/libpba.so
+
 # Add VisualSFM and meshlab bin folder to PATH.
 ENV PATH $PATH:/opt/PoissonRecon/Bin/Linux
 ENV PATH $PATH:/opt/meshlab/src/distrib
