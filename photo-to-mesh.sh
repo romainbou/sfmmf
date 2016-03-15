@@ -38,7 +38,10 @@ mergeMeshes () {
   inputFolder=$1
   outputName=$2
   echo "Merging all meshs with meshlab..."
-  mkdir $inputFolder/points/
+  
+  if [ ! -d "$inputFolder/points/" ]; then
+    mkdir $inputFolder/points/
+  fi
   meshlabserver -i $inputFolder/points/*.ply -o $inputFolder/points/$outputName-points.ply -om vc vq vn fq fn wc wn wt
 }
 
@@ -52,6 +55,7 @@ pmvsComputation () {
 removeImageLists () {
   inputFolder=$1
   outputName=$2
+  echo "Removing image list files"
   rm $inputFolder/$outputName-image-list.txt
   rm $inputFolder/resized-$outputName-image-list.txt
 }
@@ -59,6 +63,7 @@ removeImageLists () {
 removeVisualtSFMfiles () {
   inputFolder=$1
   outputName=$2
+  echo "Removing VisualSFM files"
   # TODO fix
   # rm: impossible de supprimer 'result.cmvs': Aucun fichier ou dossier de ce type
   rm -R $inputFolder/points/result.cmvs
