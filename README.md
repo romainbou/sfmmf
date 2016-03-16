@@ -14,7 +14,7 @@ First arguement give a path to a folder containing:
 ## Using docker:
 `docker run -v pathToHostImageFolder:/opt/workdir /opt/photo-to-mesh.sh /opt/workdir outputsPrefix`
 
-### Using wrapper scripts:
+### or with the wrapper scripts:
 To launch photo-to-mesh script with your host folder mounted at container's /opt/workdir  
 `./run.sh pathToHostImageFolder/`
 
