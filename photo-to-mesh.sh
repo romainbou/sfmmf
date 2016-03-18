@@ -39,7 +39,7 @@ resizeAllimage (){
   inputFolder=$1
   outputName=$2
   # convert $inputFolder/*.jpg[3200x3200] resized%03d.jpg
-
+  nb_resized=0
   if [ ! -d "$inputFolder/resized-images/" ]; then
     mkdir $inputFolder/resized-images/
   else
