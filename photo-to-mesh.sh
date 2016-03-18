@@ -14,9 +14,6 @@ createFolders () {
   if [ ! -d "$inputFolder/images/" ]; then
     mkdir $inputFolder/images/
   fi
-  if [ ! -d "$inputFolder/resized-images/" ]; then
-    mkdir $inputFolder/resized-images/
-  fi
 
   mv $inputFolder/*.jpg $inputFolder/images/ 2> /dev/null
   mv $inputFolder/*.JPG $inputFolder/images/ 2> /dev/null
@@ -34,6 +31,8 @@ createImageList () {
     echo "No image found"
     exit 1
   fi
+
+  echo "$outputName-image-list.txt"
 }
 
 resizeAllimage (){
@@ -41,26 +40,36 @@ resizeAllimage (){
   outputName=$2
   # convert $inputFolder/*.jpg[3200x3200] resized%03d.jpg
 
+  if [ ! -d "$inputFolder/resized-images/" ]; then
+    mkdir $inputFolder/resized-images/
+  else
+    nb_resized=$(ls -l $inputFolder/resized-images/ | grep .jpg | wc -l)
+  fi
+
   # Better quality:
   # convertCommand="convert"
   # Faster:
-  convertCommand="convert -filter Point"
+  convertCommand="convert -filter Point -define registry:temporary-path=$inputFolder/tmp"
 
   nb_jpg=$(ls -l $inputFolder/images/ | grep .jpg | wc -l)
-  if [ $nb_jpg -gt 0 ]
+  if [ $nb_jpg -gt 0 ] && [ $nb_jpg -gt $nb_resized ]
   then
     echo "Resizing too large images..."
-    $convertCommand $inputFolder/images/*.jpg[3200\>x3200\>] $inputFolder/resized-images/resized%03d.jpg
+    ulimit -v 2097152
+    nice $convertCommand $inputFolder/images/*.jpg[3200\>x3200\>] $inputFolder/resized-images/resized%03d.jpg
+    ulimit -v unlimited
     if [ $? -ne 0 ]; then
       exit 1
     fi
   fi
 
   nb_jpg=$(ls -l $inputFolder/images/ | grep .JPG | wc -l)
-  if [ $nb_jpg -gt 0 ]
+  if [ $nb_jpg -gt 0 ] && [ $nb_jpg -gt $nb_resized ]
   then
     echo "Resizing too large images..."
-    $convertCommand $inputFolder/images/*.JPG[3200\>x3200\>] $inputFolder/resized-images/resized%03d.jpg
+    ulimit -v 2097152
+    nice $convertCommand $inputFolder/images/*.JPG[3200\>x3200\>] $inputFolder/resized-images/resized%03d.jpg
+    ulimit -v unlimited
     if [ $? -ne 0 ]; then
       exit 1
     fi
@@ -73,6 +82,8 @@ resizeAllimage (){
     echo "No resized usable image found"
     exit 1
   fi
+  echo "resized-$outputName-image-list.txt"
+  exit 0
 }
 
 mergeMeshes () {
@@ -111,9 +122,9 @@ computeMesh () {
   inputFolder=$1
   outputName=$2
   createFolders $inputFolder $outputName
-  createImageList $inputFolder $outputName
-  resizeAllimage $inputFolder $outputName
-  VisualSFM sfm $inputFolder/resized-$outputName-image-list.txt $inputFolder/points/$outputName-visualSFM-results.nvm
+  imageListPath=$(createImageList $inputFolder $outputName)
+  imageListPath=$(resizeAllimage $inputFolder $outputName)
+  VisualSFM sfm $inputFolder/$imageListPath $inputFolder/points/$outputName-visualSFM-results.nvm
   # PMVS2
   # mergeMeshes $inputFolder $outputName
   # TODO avancement des stif files ls -1 | grep .sift | wc -l
