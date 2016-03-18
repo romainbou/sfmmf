@@ -3,45 +3,83 @@
 inputFolder=$1
 outputName=$2
 
+createFolders () {
+  inputFolder=$1
+  outputName=$2
+
+  echo "Creating folders and moving images..."
+  if [ ! -d "$inputFolder/points/" ]; then
+    mkdir $inputFolder/points/
+  fi
+  if [ ! -d "$inputFolder/images/" ]; then
+    mkdir $inputFolder/images/
+  fi
+  if [ ! -d "$inputFolder/resized-images/" ]; then
+    mkdir $inputFolder/resized-images/
+  fi
+
+  mv $inputFolder/*.jpg $inputFolder/images/ 2> /dev/null
+  mv $inputFolder/*.JPG $inputFolder/images/ 2> /dev/null
+  mv $inputFolder/*.png $inputFolder/images/ 2> /dev/null
+  mv $inputFolder/*.PNG $inputFolder/images/ 2> /dev/null
+}
+
 createImageList () {
   inputFolder=$1
   outputName=$2
   echo "Creating image list"
   find $inputFolder/images/ -maxdepth 1 | grep '.jpg\|.JPG' > $inputFolder/$outputName-image-list.txt
+  nbImages=$(wc -l < $inputFolder/$outputName-image-list.txt)
+  if [ ! $nbImages -gt 0 ]; then
+    echo "No image found"
+    exit 1
+  fi
 }
 
 resizeAllimage (){
   inputFolder=$1
   outputName=$2
   # convert $inputFolder/*.jpg[3200x3200] resized%03d.jpg
-  if [ ! -d "$inputFolder/resized-images/" ]; then
-    mkdir $inputFolder/resized-images/
-  fi
 
-  nb_jpg=$(ls -l | grep .jpg | wc -l)
+  # Better quality:
+  # convertCommand="convert"
+  # Faster:
+  convertCommand="convert -filter Point"
+
+  nb_jpg=$(ls -l $inputFolder/images/ | grep .jpg | wc -l)
   if [ $nb_jpg -gt 0 ]
   then
     echo "Resizing too large images..."
-    convert $inputFolder/images/*.jpg[3200\>x3200\>] $inputFolder/resized-images/resized%03d.jpg
+    $convertCommand $inputFolder/images/*.jpg[3200\>x3200\>] $inputFolder/resized-images/resized%03d.jpg
+    if [ $? -ne 0 ]; then
+      exit 1
+    fi
   fi
 
-  nb_jpg=$(ls -l | grep .JPG | wc -l)
+  nb_jpg=$(ls -l $inputFolder/images/ | grep .JPG | wc -l)
   if [ $nb_jpg -gt 0 ]
   then
     echo "Resizing too large images..."
-    convert $inputFolder/images/*.JPG[3200\>x3200\>] $inputFolder/resized-images/resized%03d.jpg
+    $convertCommand $inputFolder/images/*.JPG[3200\>x3200\>] $inputFolder/resized-images/resized%03d.jpg
+    if [ $? -ne 0 ]; then
+      exit 1
+    fi
   fi
+
+
   find $inputFolder/resized-images/ -maxdepth 1 | grep '.jpg' > $inputFolder/resized-$outputName-image-list.txt
+  nbImages=$(wc -l < $inputFolder/resized-$outputName-image-list.txt)
+  if [ ! $nbImages -gt 0 ]; then
+    echo "No resized usable image found"
+    exit 1
+  fi
 }
 
 mergeMeshes () {
   inputFolder=$1
   outputName=$2
   echo "Merging all meshs with meshlab..."
-  
-  if [ ! -d "$inputFolder/points/" ]; then
-    mkdir $inputFolder/points/
-  fi
+
   meshlabserver -i $inputFolder/points/*.ply -o $inputFolder/points/$outputName-points.ply -om vc vq vn fq fn wc wn wt
 }
 
@@ -72,10 +110,12 @@ removeVisualtSFMfiles () {
 computeMesh () {
   inputFolder=$1
   outputName=$2
+  createFolders $inputFolder $outputName
   createImageList $inputFolder $outputName
   resizeAllimage $inputFolder $outputName
-  VisualSFM sfm+pmvs $inputFolder/resized-$outputName-image-list.txt $inputFolder/points/$outputName-visualSFM-results.nvm
-  mergeMeshes $inputFolder $outputName
+  VisualSFM sfm $inputFolder/resized-$outputName-image-list.txt $inputFolder/points/$outputName-visualSFM-results.nvm
+  # PMVS2
+  # mergeMeshes $inputFolder $outputName
   # TODO avancement des stif files ls -1 | grep .sift | wc -l
   # TODO maybe remove SIFT files in the images folder
   pmvsComputation $inputFolder $outputName
@@ -84,6 +124,8 @@ computeMesh () {
 }
 
 if [ -n "$inputFolder" ] && [ -n "$outputName" ]; then
+  # remove trailing slash
+  inputFolder=${inputFolder%/}
   computeMesh $inputFolder $outputName
 else
     echo "argument error"
