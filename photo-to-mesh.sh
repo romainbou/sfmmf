@@ -57,7 +57,6 @@ resizeAllimage (){
     echo "Resizing too large images..."
     ulimit -v 2097152
     nice $convertCommand $inputFolder/images/*.jpg[3200\>x3200\>] $inputFolder/resized-images/resized%03d.jpg
-    ulimit -v unlimited
     if [ $? -ne 0 ]; then
       exit 1
     fi
