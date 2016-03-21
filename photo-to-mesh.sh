@@ -89,7 +89,7 @@ mergeMeshes () {
   outputName=$2
   echo "Merging all meshs with meshlab..."
   merged_point_file=$(ls -l $inputFolder/points/ | grep $outputName-points.ply | wc -l)
-  if [ ! $nb_point_files -gt 0 ]; then
+  if [ ! $merged_point_file -gt 0 ]; then
     meshlabserver -i $inputFolder/points/*.ply -o $inputFolder/points/$outputName-points.ply -om vc vq vn fq fn wc wn wt
   else
     echo "Merged point file exist skipping meshlab merge..."
@@ -99,8 +99,8 @@ mergeMeshes () {
 poissonComputation () {
   inputFolder=$1
   outputName=$2
-  merged_point_file=$(ls -l $inputFolder/ | grep $outputName-mesh.ply | wc -l)
-  if [ ! $nb_point_files -gt 0 ]; then
+  poisson_file=$(ls -l $inputFolder/ | grep $outputName-mesh.ply | wc -l)
+  if [ ! $poisson_file -gt 0 ]; then
     echo "Creating the mesh from the point cloud using PoissonRecon..."
     PoissonRecon --in $inputFolder/points/$outputName-points.ply --out $inputFolder/$outputName-mesh.ply --depth 12 --color 16
   else
@@ -111,8 +111,8 @@ poissonComputation () {
 meshlabCleaning () {
   inputFolder=$1
   outputName=$2
-  merged_point_file=$(ls -l $inputFolder/ | grep $outputName-cleaned.ply | wc -l)
-  if [ ! $nb_point_files -gt 0 ]; then
+  cleaned_files=$(ls -l $inputFolder/ | grep $outputName-cleaned.ply | wc -l)
+  if [ ! $cleaned_files -gt 0 ]; then
     echo "Cleaning the mesh with meshlab filters..."
     meshlabserver -i $inputFolder/$outputName-mesh.ply -o $inputFolder/$outputName-cleaned.ply -s meshlab-script.mlx -om vc vf vq vn vt fc fq fn wc wn wt
   else
