@@ -100,6 +100,14 @@ poissonComputation () {
   PoissonRecon --in $inputFolder/points/$outputName-points.ply --out $inputFolder/$outputName-mesh.ply --depth 12 --color 16
 }
 
+meshlabCleaning () {
+  inputFolder=$1
+  outputName=$2
+  echo "Cleaning the mesh with meshlab filters..."
+
+  meshlabserver -i $inputFolder/$outputName-mesh.ply -o $inputFolder/$outputName-cleaned.ply -s meshlab-script.mlx -om vc vf vq vn vt fc fq fn wc wn wt
+}
+
 removeImageLists () {
   inputFolder=$1
   outputName=$2
@@ -132,6 +140,7 @@ computeMesh () {
   # TODO avancement des stif files ls -1 | grep .sift | wc -l
   # TODO maybe remove SIFT files in the images folder
   poissonComputation $inputFolder $outputName
+  meshlabCleaning $inputFolder $outputName
   #removeImageLists
   # removeVisualtSFMfiles
 }

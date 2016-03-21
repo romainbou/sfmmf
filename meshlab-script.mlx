@@ -1,0 +1,13 @@
+<!DOCTYPE FilterScript>
+<FilterScript>
+  <filter name="Select Faces with edges longer than...">
+   <Param tooltip="All the faces with an edge &lt;b>longer&lt;/b> than this threshold will be deleted. Useful for removing long skinny faces obtained by bad triangulation of range maps." description="Edge Threshold" type="RichDynamicFloat" value="0.3" min="0" name="Threshold" max="63.1364"/>
+  </filter>
+ <filter name="Delete Selected Faces and Vertices"/>
+ <filter name="Remove Isolated pieces (wrt Diameter)">
+  <Param tooltip="Delete all the connected components (floating pieces) with a diameter smaller than the specified one" description="Enter max diameter of isolated pieces" type="RichAbsPerc" value="15.1528" min="0" name="MinComponentDiag" max="126.273"/>
+ </filter>
+ <filter name="Remove Isolated pieces (wrt Face Num.)">
+  <Param tooltip="Delete all the connected components (floating pieces) composed by a number of triangles smaller than the specified one" description="Enter minimum conn. comp size:" type="RichInt" value="50000" name="MinComponentSize"/>
+ </filter>
+</FilterScript>
