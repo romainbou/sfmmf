@@ -69,7 +69,6 @@ resizeAllimage (){
     echo "Resizing too large images..."
     ulimit -v 2097152
     nice $convertCommand $inputFolder/images/*.JPG[3200\>x3200\>] $inputFolder/resized-images/resized%03d.jpg
-    ulimit -v unlimited
     if [ $? -ne 0 ]; then
       exit 1
     fi
@@ -94,11 +93,11 @@ mergeMeshes () {
   meshlabserver -i $inputFolder/points/*.ply -o $inputFolder/points/$outputName-points.ply -om vc vq vn fq fn wc wn wt
 }
 
-pmvsComputation () {
+poissonComputation () {
   inputFolder=$1
   outputName=$2
   echo "Creating the mesh from the point cloud using PoissonRecon..."
-  PoissonRecon --in $inputFolder/points/$outputName-points.ply --out $inputFolder/$outputName-mesh.ply --depth 10 --color 16
+  PoissonRecon --in $inputFolder/points/$outputName-points.ply --out $inputFolder/$outputName-mesh.ply --depth 12 --color 16
 }
 
 removeImageLists () {
@@ -124,12 +123,15 @@ computeMesh () {
   createFolders $inputFolder $outputName
   imageListPath=$(createImageList $inputFolder $outputName)
   imageListPath=$(resizeAllimage $inputFolder $outputName)
-  VisualSFM sfm $inputFolder/$imageListPath $inputFolder/points/$outputName-visualSFM-results.nvm
-  # PMVS2
-  # mergeMeshes $inputFolder $outputName
+  VisualSFM sfm+pmvs $inputFolder/$imageListPath $inputFolder/points/$outputName-visualSFM-results.nvm
+  if [ $? -ne 0 ]; then
+    echo "Error with visual SFM"
+    exit 1
+  fi
+  mergeMeshes $inputFolder $outputName
   # TODO avancement des stif files ls -1 | grep .sift | wc -l
   # TODO maybe remove SIFT files in the images folder
-  pmvsComputation $inputFolder $outputName
+  poissonComputation $inputFolder $outputName
   #removeImageLists
   # removeVisualtSFMfiles
 }
@@ -139,5 +141,5 @@ if [ -n "$inputFolder" ] && [ -n "$outputName" ]; then
   inputFolder=${inputFolder%/}
   computeMesh $inputFolder $outputName
 else
-    echo "argument error"
+    echo "arguments missing"
 fi
