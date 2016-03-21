@@ -29,4 +29,5 @@ ENV DISPLAY :100
 
 # copy sequence script
 ADD ./photo-to-mesh.sh /opt/
+ADD ./meshlab-script.mlx /opt/
 RUN chmod +x /opt/photo-to-mesh.sh && mkdir /opt/workdir
