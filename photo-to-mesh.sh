@@ -88,23 +88,36 @@ mergeMeshes () {
   inputFolder=$1
   outputName=$2
   echo "Merging all meshs with meshlab..."
-
-  meshlabserver -i $inputFolder/points/*.ply -o $inputFolder/points/$outputName-points.ply -om vc vq vn fq fn wc wn wt
+  merged_point_file=$(ls -l $inputFolder/points/ | grep $outputName-points.ply | wc -l)
+  if [ ! $nb_point_files -gt 0 ]; then
+    meshlabserver -i $inputFolder/points/*.ply -o $inputFolder/points/$outputName-points.ply -om vc vq vn fq fn wc wn wt
+  else
+    echo "Merged point file exist skipping meshlab merge..."
+  fi
 }
 
 poissonComputation () {
   inputFolder=$1
   outputName=$2
-  echo "Creating the mesh from the point cloud using PoissonRecon..."
-  PoissonRecon --in $inputFolder/points/$outputName-points.ply --out $inputFolder/$outputName-mesh.ply --depth 12 --color 16
+  merged_point_file=$(ls -l $inputFolder/ | grep $outputName-mesh.ply | wc -l)
+  if [ ! $nb_point_files -gt 0 ]; then
+    echo "Creating the mesh from the point cloud using PoissonRecon..."
+    PoissonRecon --in $inputFolder/points/$outputName-points.ply --out $inputFolder/$outputName-mesh.ply --depth 12 --color 16
+  else
+    echo "Meshfile exist. Skipping PoissonRecon..."
+  fi
 }
 
 meshlabCleaning () {
   inputFolder=$1
   outputName=$2
-  echo "Cleaning the mesh with meshlab filters..."
-
-  meshlabserver -i $inputFolder/$outputName-mesh.ply -o $inputFolder/$outputName-cleaned.ply -s meshlab-script.mlx -om vc vf vq vn vt fc fq fn wc wn wt
+  merged_point_file=$(ls -l $inputFolder/ | grep $outputName-cleaned.ply | wc -l)
+  if [ ! $nb_point_files -gt 0 ]; then
+    echo "Cleaning the mesh with meshlab filters..."
+    meshlabserver -i $inputFolder/$outputName-mesh.ply -o $inputFolder/$outputName-cleaned.ply -s meshlab-script.mlx -om vc vf vq vn vt fc fq fn wc wn wt
+  else
+    echo "Clean version exist. Skipping meshlab cleaning..."
+  fi
 }
 
 removeImageLists () {
@@ -130,10 +143,15 @@ computeMesh () {
   createFolders $inputFolder $outputName
   imageListPath=$(createImageList $inputFolder $outputName)
   imageListPath=$(resizeAllimage $inputFolder $outputName)
-  VisualSFM sfm+pmvs $inputFolder/$imageListPath $inputFolder/points/$outputName-visualSFM-results.nvm
-  if [ $? -ne 0 ]; then
-    echo "Error with visual SFM"
-    exit 1
+  nb_point_files=$(ls -l $inputFolder/points/ | grep .ply | wc -l)
+  if [ ! $nb_point_files -gt 0 ]; then
+    VisualSFM sfm+pmvs $inputFolder/$imageListPath $inputFolder/points/$outputName-visualSFM-results.nvm
+    if [ $? -ne 0 ]; then
+      echo "Error with visual SFM"
+      exit 1
+    fi
+  else
+    echo "Point files exists... skipping visualSFM"
   fi
   mergeMeshes $inputFolder $outputName
   # TODO avancement des stif files ls -1 | grep .sift | wc -l
@@ -142,6 +160,7 @@ computeMesh () {
   meshlabCleaning $inputFolder $outputName
   #removeImageLists
   # removeVisualtSFMfiles
+  echo "All done!"
 }
 
 if [ -n "$inputFolder" ] && [ -n "$outputName" ]; then
