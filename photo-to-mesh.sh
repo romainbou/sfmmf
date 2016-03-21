@@ -91,6 +91,10 @@ mergeMeshes () {
   merged_point_file=$(ls -l $inputFolder/points/ | grep $outputName-points.ply | wc -l)
   if [ ! $merged_point_file -gt 0 ]; then
     meshlabserver -i $inputFolder/points/*.ply -o $inputFolder/points/$outputName-points.ply -om vc vq vn fq fn wc wn wt
+    if [ $? -ne 0 ]; then
+      echo "Error with meshlab while Merging"
+      exit 1
+    fi
   else
     echo "Merged point file exist skipping meshlab merge..."
   fi
@@ -103,6 +107,10 @@ poissonComputation () {
   if [ ! $poisson_file -gt 0 ]; then
     echo "Creating the mesh from the point cloud using PoissonRecon..."
     PoissonRecon --in $inputFolder/points/$outputName-points.ply --out $inputFolder/$outputName-mesh.ply --depth 12 --color 16
+    if [ $? -ne 0 ]; then
+      echo "Error with Poisson Recon"
+      exit 1
+    fi
   else
     echo "Meshfile exist. Skipping PoissonRecon..."
   fi
@@ -115,6 +123,10 @@ meshlabCleaning () {
   if [ ! $cleaned_files -gt 0 ]; then
     echo "Cleaning the mesh with meshlab filters..."
     meshlabserver -i $inputFolder/$outputName-mesh.ply -o $inputFolder/$outputName-cleaned.ply -s meshlab-script.mlx -om vc vf vq vn vt fc fq fn wc wn wt
+    if [ $? -ne 0 ]; then
+      echo "Error with meshlab while ceaning the mesh."
+      exit 1
+    fi
   else
     echo "Clean version exist. Skipping meshlab cleaning..."
   fi

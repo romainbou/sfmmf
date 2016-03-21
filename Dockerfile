@@ -23,6 +23,7 @@ ENV PATH $PATH:/opt/bin/poissonrecon
 ENV PATH $PATH:/opt/bin/meshlab
 ENV PATH $PATH:/opt/bin/vsfm
 ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/opt/bin/vsfm
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/opt/bin/meshlab
 
 RUN Xvfb :100 &
 ENV DISPLAY :100
