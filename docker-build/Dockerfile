@@ -59,7 +59,6 @@ RUN cd /opt/mpir-2.7.2/ &&\
 RUN cd /opt && \
   wget http://downloads.sourceforge.net/project/meshlab/meshlab/MeshLab%20v1.3.3/MeshLabSrc_AllInc_v133.tgz && \
   tar zxvf MeshLabSrc_AllInc_v133.tgz && \
-  sed -i '15,15 s/#//' /opt/meshlab/src/meshlabserver/meshlabserver.pro && \
   echo "linux-g++-64:INCLUDEPATH += ../../external/inc/linux-g++/mpir-2.4.0" >> /opt/meshlab/src/meshlabplugins/filter_csg/filter_csg.pro && \
   echo "linux-g++-64:INCLUDEPATH += ../../external/inc/linux-g++/mpir-2.4.0" >> /opt/meshlab/src/meshlabplugins/filter_csg/filter_csg.pro && \
   sed -i '/#include <io.h>/a #else\n#include <unistd.h>' /opt/vcglib/wrap/ply/plystuff.h
@@ -71,7 +70,13 @@ RUN cd /opt/meshlab/src/external && \
   make
 
 RUN cd /opt/meshlab/src && \
-  qmake -recursive meshlab_full.pro && \
+  cp meshlab_full.pro meshlab_half.pro
+
+RUN cd /opt/meshlab/src && \
+  sed -i '/= meshlab /d' meshlab_half.pro
+
+RUN cd /opt/meshlab/src && \
+  qmake -recursive meshlab_half.pro && \
   make
 
 # Download and build PoissonRecon
@@ -107,3 +112,7 @@ RUN mkdir /opt/bin/meshlab && \
 RUN mkdir /opt/bin/poissonrecon && \
   cp /opt/PoissonRecon/Bin/Linux/PoissonRecon /opt/bin/poissonrecon/ && \
   cp /opt/PoissonRecon/Bin/Linux/SurfaceTrimmer /opt/bin/poissonrecon/
+
+ADD ./copy-bin.sh /opt/
+
+CMD cp -R /opt/bin/* /opt/hostbin/

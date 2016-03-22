@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
   libgtk2.0-dev \
   xvfb
 
-RUN apt-get install -y mesa-utils xserver-xorg-video-all
+RUN apt-get install -y mesa-utils xserver-xorg-video-all libqtgui4
 
 RUN mkdir /opt/bin
 # Copy binares from host
