@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
   xvfb
 
 RUN apt-get install -y mesa-utils xserver-xorg-video-all libqtgui4 libqt4-opengl
+RUN apt-get install -y libc6-i386
 
 RUN mkdir /opt/bin
 # Copy binares from host
