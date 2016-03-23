@@ -54,7 +54,6 @@ resizeAllimage (){
   nb_jpg=$(ls -l $inputFolder/images/ | grep .jpg | wc -l)
   if [ $nb_jpg -gt 0 ] && [ $nb_jpg -gt $nb_resized ]
   then
-    echo "Resizing too large images..."
     ulimit -v 2097152
     nice $convertCommand $inputFolder/images/*.jpg[3200\>x3200\>] $inputFolder/resized-images/resized%03d.jpg
     if [ $? -ne 0 ]; then
@@ -65,7 +64,6 @@ resizeAllimage (){
   nb_jpg=$(ls -l $inputFolder/images/ | grep .JPG | wc -l)
   if [ $nb_jpg -gt 0 ] && [ $nb_jpg -gt $nb_resized ]
   then
-    echo "Resizing too large images..."
     ulimit -v 2097152
     nice $convertCommand $inputFolder/images/*.JPG[3200\>x3200\>] $inputFolder/resized-images/resized%03d.jpg
     if [ $? -ne 0 ]; then
@@ -154,10 +152,13 @@ computeMesh () {
   outputName=$2
   createFolders $inputFolder $outputName
   imageListPath=$(createImageList $inputFolder $outputName)
+  echo "Resizing too large images..."
   imageListPath=$(resizeAllimage $inputFolder $outputName)
   nb_point_files=$(ls -l $inputFolder/points/ | grep .ply | wc -l)
   if [ ! $nb_point_files -gt 0 ]; then
-    VisualSFM sfm+pmvs $inputFolder/$imageListPath $inputFolder/points/$outputName-visualSFM-results.nvm
+    echo "VisualSFM sfm+pmvs..."
+    echo "$inputFolder/$imageListPath"
+    VisualSFM sfm+pmvs "$inputFolder/$imageListPath" "$inputFolder/points/$outputName-visualSFM-results.nvm"
     if [ $? -ne 0 ]; then
       echo "Error with visual SFM"
       exit 1
