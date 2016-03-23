@@ -101,6 +101,7 @@ mergeMeshes () {
 poissonComputation () {
   inputFolder=$1
   outputName=$2
+  echo "ls -l $inputFolder/ | grep *mesh.ply | wc -l"
   poisson_file=$(ls -l $inputFolder/ | grep $outputName-mesh.ply | wc -l)
   if [ ! $poisson_file -gt 0 ]; then
     echo "Creating the mesh from the point cloud using PoissonRecon..."
@@ -117,7 +118,7 @@ poissonComputation () {
 meshlabCleaning () {
   inputFolder=$1
   outputName=$2
-  cleaned_files=$(ls -l $inputFolder/ | grep $outputName-cleaned.ply | wc -l)
+  cleaned_files=$(ls -l $inputFolder/ | grep *cleaned.ply | wc -l)
   if [ ! $cleaned_files -gt 0 ]; then
     echo "Cleaning the mesh with meshlab filters..."
     meshlabserver -i $inputFolder/$outputName-mesh.ply -o $inputFolder/$outputName-cleaned.ply -s meshlab-script.mlx -om vc vf vq vn vt fc fq fn wc wn wt
@@ -154,10 +155,9 @@ computeMesh () {
   imageListPath=$(createImageList $inputFolder $outputName)
   echo "Resizing too large images..."
   imageListPath=$(resizeAllimage $inputFolder $outputName)
-  nb_point_files=$(ls -l $inputFolder/points/ | grep .ply | wc -l)
+  nb_point_files=$(ls -l "$inputFolder/points/" | grep .ply | wc -l)
   if [ ! $nb_point_files -gt 0 ]; then
     echo "VisualSFM sfm+pmvs..."
-    echo "$inputFolder/$imageListPath"
     VisualSFM sfm+pmvs "$inputFolder/$imageListPath" "$inputFolder/points/$outputName-visualSFM-results.nvm"
     if [ $? -ne 0 ]; then
       echo "Error with visual SFM"
@@ -180,6 +180,7 @@ if [ -n "$inputFolder" ] && [ -n "$outputName" ]; then
   # remove trailing slash
   inputFolder=${inputFolder%/}
   computeMesh $inputFolder $outputName
+  exit 0
 else
     echo "arguments missing"
 fi
