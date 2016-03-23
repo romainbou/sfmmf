@@ -20,3 +20,6 @@ To launch photo-to-mesh script with your host folder mounted at container's /opt
 
 To lauch bash (docker -it) with your host folder mounted at container's /opt/workdrir  
 `./it.sh pathToHostImageFolder/`
+
+### To build all binaries from scratch and copy them to the right folder:
+`./build.sh`
