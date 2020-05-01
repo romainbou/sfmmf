@@ -1,5 +1,5 @@
 # sfmmf
-Warping Structure from Motion pipeline in one command line
+Wrapping Structure from Motion pipeline in one command line
 
 ## Usage:
 
